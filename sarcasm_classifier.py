@@ -33,6 +33,15 @@
 # Tensorflow text classification:
 # https://developers.google.com/machine-learning/guides/text-classification/step-3
 
+# Sequential model guide:
+# https://keras.io/getting-started/sequential-model-guide/
+
+# Understanding activation functions:
+# https://medium.com/the-theory-of-everything/understanding-activation-functions-in-neural-networks-9491262884e0
+
+# Deciding on number of hidden layers and nodes for a neural network:
+# https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden-layers-and-nodes-in-a-feedforward-neural-netw
+
 # Classifier and data processing packages
 from tensorflow.python.keras.preprocessing import sequence
 from tensorflow.python.keras.preprocessing import text
@@ -44,6 +53,7 @@ from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectKBest
 import numpy as np
+import scipy as sp
 
 # Data visualization package
 from matplotlib import pyplot as plotr
@@ -80,29 +90,29 @@ splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
 # Resulting data split indices.
 train_ind, test_ind = next(splitter.split(sarcasm_feature_matrix, sarcasm_target_numpy))
 
-# First classifier: Multinomial Naive Bayes (default hyperparameters)
-multiNB = MultinomialNB()
-
-# Train the classifier using the training data.
-multiNB.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
-
-# Test out the classifier on testing data.
-predicted_sarcasm = multiNB.predict(sarcasm_feature_matrix[test_ind])
-
-# Check the score for predicted sarcasm values.
-print(multiNB.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
-
-# Second classifier: Support Vector Machines (default hyperparameters)
-lineSVC = LinearSVC()
-
-# Train the classifier using the training data.
-lineSVC.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
-
-# Test out the classifier on testing data.
-predicted_sarcasm = lineSVC.predict(sarcasm_feature_matrix[test_ind])
-
-# Check the score for predicted sarcasm values.
-print(lineSVC.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
+# # First classifier: Multinomial Naive Bayes (default hyperparameters)
+# multiNB = MultinomialNB()
+#
+# # Train the classifier using the training data.
+# multiNB.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
+#
+# # Test out the classifier on testing data.
+# predicted_sarcasm = multiNB.predict(sarcasm_feature_matrix[test_ind])
+#
+# # Check the score for predicted sarcasm values.
+# print(multiNB.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
+#
+# # Second classifier: Support Vector Machines (default hyperparameters)
+# lineSVC = LinearSVC()
+#
+# # Train the classifier using the training data.
+# lineSVC.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
+#
+# # Test out the classifier on testing data.
+# predicted_sarcasm = lineSVC.predict(sarcasm_feature_matrix[test_ind])
+#
+# # Check the score for predicted sarcasm values.
+# print(lineSVC.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
 
 # NB: Linear SVM has a better score than Multinomial NB using their respective default hyperparameter values.
 
@@ -112,7 +122,12 @@ print(lineSVC.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_
 # We shall go along with the suggested cap of 20000 (from tensorflow's tutorial) top features to work with.
 feat_cap = 20000
 feature_selector = SelectKBest(k=min(feat_cap, sarcasm_feature_matrix.shape[1]))
-best_sarcasm_features = feature_selector.fit(sarcasm_feature_matrix, sarcasm_target_numpy)
+
+# Results in a scipy sparse matrix.
+best_sarcasm_features = feature_selector.fit_transform(sarcasm_feature_matrix, sarcasm_target_numpy)
+
+# Convert it to a numpy array.
+best_sarcasm_features_numpy = best_sarcasm_features.toarray()
 
 # Sequence vectors:
 # Tokenize words from original headline array and create a vocabulary of 20000 of the most frequent features.
@@ -134,9 +149,22 @@ if max_length > seq_cap:
 sarcasm_feature_sequence = sequence.pad_sequences(sarcasm_feature_sequence, maxlen=max_length)
 
 # Build the model depending on the means of data preparation (n-gram vectors or sequence vectors)
-# N-gram vector model: Using multi-layer perceptrons
-# Build a
+# N-gram vector model: Using multi-layer perceptrons.
+# Build a multi-layer network.
+the_layers = [layers.Dropout(0.2, input_shape=best_sarcasm_features_numpy.shape),
+                layers.Dense(128, activation='sigmoid'),
+                layers.Dropout(0.2),
+              layers.Dense(128, activation='sigmoid'),
+              layers.Dense(1, activation='sigmoid')]
+networkMLP = Sequential(layers=the_layers)
 
+# Compile the network.
+networkMLP.compile(optimizer='adam')
+
+# Train the model using the data.
+training = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_target_numpy[train_ind],
+                          validation_data=(best_sarcasm_features_numpy[test_ind], sarcasm_target_numpy[test_ind]),
+                          )
 
 
 
