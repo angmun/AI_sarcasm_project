@@ -31,7 +31,7 @@
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html
 
 # Tensorflow text classification:
-# https://developers.google.com/machine-learning/guides/text-classification/step-3
+# https://developers.google.com/machine-learning/guides/text-classification
 
 # Sequential model guide:
 # https://keras.io/getting-started/sequential-model-guide/
@@ -150,6 +150,14 @@ sarcasm_feature_sequence = sequence.pad_sequences(sarcasm_feature_sequence, maxl
 
 # Build the model depending on the means of data preparation (n-gram vectors or sequence vectors)
 # N-gram vector model: Using multi-layer perceptrons.
+# Split the data for training using StratifiedShuffleSplit to balance samples from each class.
+splitter1 = StratifiedShuffleSplit(n_splits=1, test_size=0.67, random_state=0)
+splitter2 = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
+
+# Resulting data split indices.
+train_ind, other_ind = next(splitter1.split(best_sarcasm_features_numpy, sarcasm_target_numpy))
+val_ind, accest_ind = next(splitter2.split(best_sarcasm_features_numpy[other_ind], sarcasm_target_numpy[other_ind]))
+
 # Build a multi-layer network.
 the_layers = [layers.Dropout(0.2, input_shape=best_sarcasm_features_numpy.shape),
                 layers.Dense(128, activation='sigmoid'),
@@ -159,13 +167,9 @@ the_layers = [layers.Dropout(0.2, input_shape=best_sarcasm_features_numpy.shape)
 networkMLP = Sequential(layers=the_layers)
 
 # Compile the network.
-networkMLP.compile(optimizer='adam')
+networkMLP.compile(optimizer='adam', metrics=['accuracy'], loss='binary_crossentropy')
 
 # Train the model using the data.
 training = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_target_numpy[train_ind],
-                          validation_data=(best_sarcasm_features_numpy[test_ind], sarcasm_target_numpy[test_ind]),
-                          )
-
-
-
-
+                          validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
+                          epochs=10)
