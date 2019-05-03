@@ -42,8 +42,8 @@
 # Deciding on number of hidden layers and nodes for a neural network:
 # https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden-layers-and-nodes-in-a-feedforward-neural-netw
 
-# Input dimension mismatch issue:
-# https://github.com/keras-team/keras/issues/6351
+# Stacked bar plot
+# https://matplotlib.org/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py
 
 # Classifier and data processing packages
 from tensorflow.python.keras.preprocessing import sequence
@@ -311,11 +311,13 @@ model_loss = [evaluating064[0], evaluating164[0], evaluating264[0], evaluating01
               evaluating2128[0]]
 model_acc = [evaluating064[1], evaluating164[1], evaluating264[1], evaluating0128[1], evaluating1128[1],
              evaluating2128[1]]
-plotr.bar(bar_pos, model_acc, 0.5, yerr=model_loss, capsize=5)
+p1 = plotr.bar(bar_pos, model_acc, 0.5)
+p2 = plotr.bar(bar_pos, model_loss, 0.5, bottom=model_acc)
 plotr.ylabel('Model Accuracy')
 plotr.xlabel('Model Configuration')
 plotr.xticks(bar_pos, model_config)
 plotr.title('Sarcasm detection MLP model accuracy')
+plotr.legend((p1[0], p2[0]), ('Accuracy', 'Loss'))
 plotr.show()
 plotr.clf()
 
