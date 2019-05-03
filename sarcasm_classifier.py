@@ -64,7 +64,7 @@ from matplotlib import pyplot as plotr
 # Data file reading and processing packages
 import pandas
 
-# import sklearn_pandas as skp
+
 
 # First load the data-set so we have access to its contents.
 # It is a json file so we open the file and read its contents line by line.
@@ -166,7 +166,7 @@ val_ind, accest_ind = next(splitter2.split(best_sarcasm_features_numpy[other_ind
 # Build a multi-layer network.
 # 64 input for Dense layers:
 # With no dropout layers:
-the_layers = [layers.Dense(64, activation='sigmoid', input_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dense(64, activation='sigmoid'),
               layers.Dense(64, activation='sigmoid'),
               layers.Dense(1, activation='sigmoid')]
 networkMLP = Sequential(layers=the_layers)
@@ -176,12 +176,18 @@ networkMLP.compile(optimizer='adam', metrics=['accuracy'], loss='binary_crossent
 
 # Train the model using the data.
 # Results in a history object that contains training and validation loss and metrics values.
+# History dictionary keys => ['val_loss', 'val_acc', 'loss', 'acc']
 training064 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_target_numpy[train_ind],
                              validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                              epochs=10)
 
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+# Metrics names => ['loss', 'acc']
+evaluating064 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
 # With one dropout layer:
-the_layers = [layers.Dropout(0.2, noise_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dropout(0.2),
               layers.Dense(64, activation='sigmoid'),
               layers.Dense(64, activation='sigmoid'),
               layers.Dense(1, activation='sigmoid')]
@@ -196,8 +202,12 @@ training164 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_tar
                              validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                              epochs=10)
 
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluating164 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
 # With two dropout layers:
-the_layers = [layers.Dropout(0.2, noise_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dropout(0.2),
               layers.Dense(64, activation='sigmoid'),
               layers.Dropout(0.2),
               layers.Dense(64, activation='sigmoid'),
@@ -213,9 +223,13 @@ training264 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_tar
                              validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                              epochs=10)
 
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluating264 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
 # 128 input for Dense layers:
 # With no dropout layers:
-the_layers = [layers.Dense(128, activation='sigmoid', input_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dense(128, activation='sigmoid'),
               layers.Dense(128, activation='sigmoid'),
               layers.Dense(1, activation='sigmoid')]
 networkMLP = Sequential(layers=the_layers)
@@ -229,8 +243,12 @@ training0128 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_ta
                               validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                               epochs=10)
 
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluating0128 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
 # With one dropout layer:
-the_layers = [layers.Dropout(0.2, noise_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dropout(0.2),
               layers.Dense(128, activation='sigmoid'),
               layers.Dense(128, activation='sigmoid'),
               layers.Dense(1, activation='sigmoid')]
@@ -245,8 +263,12 @@ training1128 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_ta
                               validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                               epochs=10)
 
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluating1128 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
 # With two dropout layers:
-the_layers = [layers.Dropout(0.2, noise_shape=best_sarcasm_features_numpy.shape),
+the_layers = [layers.Dropout(0.2),
               layers.Dense(128, activation='sigmoid'),
               layers.Dropout(0.2),
               layers.Dense(128, activation='sigmoid'),
@@ -262,17 +284,38 @@ training2128 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_ta
                           validation_data=(best_sarcasm_features_numpy[val_ind], sarcasm_target_numpy[val_ind]),
                           epochs=10)
 
-# Plot the learning curves for the six configurations of the network:
-plotr.plot(training064.epoch, training064.history['val_acc'], label='64 units, 0 dropout')
-plotr.plot(training164.epoch, training164.history['val_acc'], label='64 units, 1 dropout')
-plotr.plot(training264.epoch, training264.history['val_acc'], label='64 units, 2 dropouts')
-plotr.plot(training0128.epoch, training0128.history['val_acc'], label='128 units, 0 dropout')
-plotr.plot(training1128.epoch, training1128.history['val_acc'], label='128 units, 1 dropout')
-plotr.plot(training2128.epoch, training2128.history['val_acc'], label='128 units, 2 dropouts')
-plotr.title('Sarcasm detection learning curve')
-plotr.xlabel("Training epochs")
-plotr.ylabel("Network Accuracy")
-plotr.legend()
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluating2128 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
+
+# # Plot the learning curves for the six configurations of the network:
+# plotr.plot(training064.epoch, training064.history['val_acc'], label='64 units, 0 dropout')
+# plotr.plot(training164.epoch, training164.history['val_acc'], label='64 units, 1 dropout')
+# plotr.plot(training264.epoch, training264.history['val_acc'], label='64 units, 2 dropouts')
+# plotr.plot(training0128.epoch, training0128.history['val_acc'], label='128 units, 0 dropout')
+# plotr.plot(training1128.epoch, training1128.history['val_acc'], label='128 units, 1 dropout')
+# plotr.plot(training2128.epoch, training2128.history['val_acc'], label='128 units, 2 dropouts')
+# plotr.title('Sarcasm detection learning curve')
+# plotr.xlabel("Training epochs")
+# plotr.ylabel("Network Accuracy")
+# plotr.legend()
+# plotr.show()
+# plotr.clf()
+
+# Plot the bar graph for accuracy values of the network configurations when evaluated using the acc_est data split:
+# The bar positions on the graph:
+bar_pos = [x for x in range(6)]
+model_config = ['64 Units\n0 Dropouts', '64 Units\n1 Dropouts', '64 Units\n2 Dropouts', '128 Units\n0 Dropouts',
+                '128 Units\n1 Dropouts', '128 Units\n2 Dropouts']
+model_loss = [evaluating064[0], evaluating164[0], evaluating264[0], evaluating0128[0], evaluating1128[0],
+              evaluating2128[0]]
+model_acc = [evaluating064[1], evaluating164[1], evaluating264[1], evaluating0128[1], evaluating1128[1],
+             evaluating2128[1]]
+plotr.bar(bar_pos, model_acc, 0.5, yerr=model_loss, capsize=5)
+plotr.ylabel('Model Accuracy')
+plotr.xlabel('Model Configuration')
+plotr.xticks(bar_pos, model_config)
+plotr.title('Sarcasm detection MLP model accuracy')
 plotr.show()
 plotr.clf()
 
