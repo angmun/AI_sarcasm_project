@@ -91,36 +91,36 @@ count_vect = TfidfVectorizer(ngram_range=(1, 2))
 # Results in a sparse document-term matrix (words/unigrams are features).
 sarcasm_feature_matrix = count_vect.fit_transform(sarcasm_data_numpy)
 
-# # Split the data for training using StratifiedShuffleSplit to balance samples from each class.
-# splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.6, random_state=0)
-#
-# # Resulting data split indices.
-# train_ind, test_ind = next(splitter.split(sarcasm_feature_matrix, sarcasm_target_numpy))
-#
-# # First classifier group: SKLearn Classifiers (default hyperparameters)
-# # Multinomial Naive Bayes :
-# multiNB = MultinomialNB()
-#
-# # Train the classifier using the training data.
-# multiNB.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
-#
-# # Test out the classifier on testing data.
-# predicted_sarcasm = multiNB.predict(sarcasm_feature_matrix[test_ind])
-#
-# # Check the score for predicted sarcasm values.
-# print(multiNB.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
-#
-# # Support Vector Machines:
-# lineSVC = LinearSVC()
-#
-# # Train the classifier using the training data.
-# lineSVC.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
-#
-# # Test out the classifier on testing data.
-# predicted_sarcasm = lineSVC.predict(sarcasm_feature_matrix[test_ind])
-#
-# # Check the score for predicted sarcasm values.
-# print(lineSVC.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
+# Split the data for training using StratifiedShuffleSplit to balance samples from each class.
+splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.6, random_state=0)
+
+# Resulting data split indices.
+train_ind, test_ind = next(splitter.split(sarcasm_feature_matrix, sarcasm_target_numpy))
+
+# First classifier group: SKLearn Classifiers (default hyperparameters)
+# Multinomial Naive Bayes :
+multiNB = MultinomialNB()
+
+# Train the classifier using the training data.
+multiNB.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
+
+# Test out the classifier on testing data.
+predicted_sarcasm = multiNB.predict(sarcasm_feature_matrix[test_ind])
+
+# Check the score for predicted sarcasm values.
+print(multiNB.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
+
+# Support Vector Machines:
+lineSVC = LinearSVC()
+
+# Train the classifier using the training data.
+lineSVC.fit(sarcasm_feature_matrix[train_ind], sarcasm_target_numpy[train_ind])
+
+# Test out the classifier on testing data.
+predicted_sarcasm = lineSVC.predict(sarcasm_feature_matrix[test_ind])
+
+# Check the score for predicted sarcasm values.
+print(lineSVC.score(sarcasm_feature_matrix[test_ind], sarcasm_target_numpy[test_ind]))
 
 # NB: Linear SVM has a better score than Multinomial NB using their respective default hyperparameter values.
 
@@ -274,19 +274,19 @@ training2128 = networkMLP.fit(best_sarcasm_features_numpy[train_ind], sarcasm_ta
 # Results in a list object that contains loss and accuracy values.
 evaluating2128 = networkMLP.evaluate(best_sarcasm_features_numpy[accest_ind], sarcasm_target_numpy[accest_ind])
 
-# # Plot the learning curves for the six configurations of the network:
-# plotr.plot(training064.epoch, training064.history['val_acc'], label='64 units, 0 dropout')
-# plotr.plot(training164.epoch, training164.history['val_acc'], label='64 units, 1 dropout')
-# plotr.plot(training264.epoch, training264.history['val_acc'], label='64 units, 2 dropouts')
-# plotr.plot(training0128.epoch, training0128.history['val_acc'], label='128 units, 0 dropout')
-# plotr.plot(training1128.epoch, training1128.history['val_acc'], label='128 units, 1 dropout')
-# plotr.plot(training2128.epoch, training2128.history['val_acc'], label='128 units, 2 dropouts')
-# plotr.title('Sarcasm detection learning curve')
-# plotr.xlabel("Training epochs")
-# plotr.ylabel("Network Accuracy")
-# plotr.legend()
-# plotr.show()
-# plotr.clf()
+# Plot the learning curves for the six configurations of the network:
+plotr.plot(training064.epoch, training064.history['val_acc'], label='64 units, 0 dropout')
+plotr.plot(training164.epoch, training164.history['val_acc'], label='64 units, 1 dropout')
+plotr.plot(training264.epoch, training264.history['val_acc'], label='64 units, 2 dropouts')
+plotr.plot(training0128.epoch, training0128.history['val_acc'], label='128 units, 0 dropout')
+plotr.plot(training1128.epoch, training1128.history['val_acc'], label='128 units, 1 dropout')
+plotr.plot(training2128.epoch, training2128.history['val_acc'], label='128 units, 2 dropouts')
+plotr.title('Sarcasm detection learning curve')
+plotr.xlabel("Training epochs")
+plotr.ylabel("Network Accuracy")
+plotr.legend()
+plotr.show()
+plotr.clf()
 
 # Plot the bar graph for accuracy values of the network configurations when evaluated using the acc_est data split:
 # The bar positions on the graph:
@@ -307,67 +307,74 @@ plotr.legend((p1[0], p2[0]), ('Accuracy', 'Loss'))
 plotr.show()
 plotr.clf()
 
-# # Sequence vector model: Using convoluted neural network.
-# # Sequence vectors:
-# # Tokenize words from original headline array and create a vocabulary of 20000 of the most frequent features.
-# token_creator = text.Tokenizer(num_words=feat_cap)
-# token_creator.fit_on_texts(sarcasm_data_numpy)
-#
-# # The length of the generated word dictionary for future use.
-# dict_len = len(token_creator.word_index)
-#
-# # Convert tokens into sequence vectors.
-# # Results in a list of sequence vectors.
-# sarcasm_feature_sequence = token_creator.texts_to_sequences(sarcasm_data_numpy)
-#
-# # We shall go along with the suggested cap of 500 (from tensorflow's tutorial) for sequence length.
-# seq_cap = 500
-#
-# max_length = len(max(sarcasm_feature_sequence, key=len))
-#
-# if max_length > seq_cap:
-#     max_length = seq_cap
-#
-# # Fix the sequence length to the cap.
-# sarcasm_feature_sequence = sequence.pad_sequences(sarcasm_feature_sequence, maxlen=max_length)
-#
-# # Save the length of a sequence for future use.
-# seq_length = len(sarcasm_feature_sequence[0])
-#
-# # Split the data for training using StratifiedShuffleSplit to balance samples from each class.
-# splitter1 = StratifiedShuffleSplit(n_splits=1, test_size=0.6, random_state=0)
-# splitter2 = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
-#
-# # Resulting data split indices.
-# train_ind, other_ind = next(splitter1.split(sarcasm_feature_sequence, sarcasm_target_numpy))
-# val_ind, accest_ind = next(splitter2.split(sarcasm_feature_sequence[other_ind], sarcasm_target_numpy[other_ind]))
-# the_cnn_layers = [layers.Embedding(dict_len, 64, input_length=seq_length),
-#                   layers.Dropout(0.2),
-#                   layers.SeparableConv1D(32, 5, activation='sigmoid', bias_initializer='random_uniform',
-#                                          depthwise_initializer='random_uniform',
-#                                          padding='same'),
-#                   layers.MaxPooling1D(5),
-#                   layers.SeparableConv1D(32, 5, activation='sigmoid', bias_initializer='random_uniform',
-#                                          depthwise_initializer='random_uniform',
-#                                          padding='same'),
-#                   layers.GlobalMaxPooling1D(),
-#                   layers.Dense(1, activation='sigmoid')
-#                   ]
-# networkCNN = Sequential(layers=the_cnn_layers)
-#
-# # Configure the network in preparation for training.
-# networkCNN.compile(optimizer='adam', metrics=['accuracy'], loss='binary_crossentropy')
-#
-# # Train the model using the data.
-# # Results in a history object that contains training and validation loss and metrics values.
-# trainingCNN = networkCNN.fit(sarcasm_feature_sequence[train_ind], sarcasm_target_numpy[train_ind],
-#                              validation_data=(sarcasm_feature_sequence[val_ind], sarcasm_target_numpy[val_ind]),
-#                              epochs=10)
-#
-# # Get the evaluation accuracy value of the network model using the acc_est data chunk.
-# # Results in a list object that contains loss and accuracy values.
-# evaluatingCNN = networkCNN.evaluate(sarcasm_feature_sequence[accest_ind], sarcasm_target_numpy[accest_ind])
-#
-# networkCNN.summary()
-# print(trainingCNN.history['val_acc'])
-# print("Accuracy: {}, Loss: {}".format(evaluatingCNN[1], evaluatingCNN[0]))
+# Sequence vector model: Using convoluted neural network.
+# Sequence vectors:
+# Tokenize words from original headline array and create a vocabulary of 20000 of the most frequent features.
+token_creator = text.Tokenizer(num_words=feat_cap)
+token_creator.fit_on_texts(sarcasm_data_numpy)
+
+# The length of the generated word dictionary for future use.
+dict_len = len(token_creator.word_index)
+
+# Convert tokens into sequence vectors.
+# Results in a list of sequence vectors.
+sarcasm_feature_sequence = token_creator.texts_to_sequences(sarcasm_data_numpy)
+
+# We shall go along with the suggested cap of 500 (from tensorflow's tutorial) for sequence length.
+seq_cap = 500
+
+max_length = len(max(sarcasm_feature_sequence, key=len))
+
+if max_length > seq_cap:
+    max_length = seq_cap
+
+# Fix the sequence length to the cap.
+sarcasm_feature_sequence = sequence.pad_sequences(sarcasm_feature_sequence, maxlen=max_length)
+
+# Save the length of a sequence for future use.
+seq_length = len(sarcasm_feature_sequence[0])
+
+# Split the data for training using StratifiedShuffleSplit to balance samples from each class.
+splitter1 = StratifiedShuffleSplit(n_splits=1, test_size=0.6, random_state=0)
+splitter2 = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
+
+# Resulting data split indices.
+train_ind, other_ind = next(splitter1.split(sarcasm_feature_sequence, sarcasm_target_numpy))
+val_ind, accest_ind = next(splitter2.split(sarcasm_feature_sequence[other_ind], sarcasm_target_numpy[other_ind]))
+the_cnn_layers = [layers.Embedding(dict_len, 64, input_length=seq_length),
+                  layers.Dropout(0.2),
+                  layers.SeparableConv1D(32, 5, activation='sigmoid', bias_initializer='random_uniform',
+                                         depthwise_initializer='random_uniform',
+                                         padding='same'),
+                  layers.MaxPooling1D(5),
+                  layers.SeparableConv1D(32, 5, activation='sigmoid', bias_initializer='random_uniform',
+                                         depthwise_initializer='random_uniform',
+                                         padding='same'),
+                  layers.GlobalMaxPooling1D(),
+                  layers.Dense(1, activation='sigmoid')
+                  ]
+networkCNN = Sequential(layers=the_cnn_layers)
+
+# Configure the network in preparation for training.
+networkCNN.compile(optimizer='adam', metrics=['accuracy'], loss='binary_crossentropy')
+
+# Train the model using the data.
+# Results in a history object that contains training and validation loss and metrics values.
+trainingCNN = networkCNN.fit(sarcasm_feature_sequence[train_ind], sarcasm_target_numpy[train_ind],
+                             validation_data=(sarcasm_feature_sequence[val_ind], sarcasm_target_numpy[val_ind]),
+                             epochs=10)
+
+# Get the evaluation accuracy value of the network model using the acc_est data chunk.
+# Results in a list object that contains loss and accuracy values.
+evaluatingCNN = networkCNN.evaluate(sarcasm_feature_sequence[accest_ind], sarcasm_target_numpy[accest_ind])
+
+# Plot the learning curve for the convoluted neural network.
+plotr.plot(trainingCNN.epoch, trainingCNN.history['val_acc'], label='Val_Acc')
+plotr.plot(trainingCNN.epoch, trainingCNN.history['val_loss'], label='Val_Loss')
+plotr.title('Sarcasm detection learning curve sepCNN')
+plotr.xlabel("Training epochs")
+plotr.ylabel("Network Metric Values")
+plotr.legend()
+plotr.show()
+plotr.clf()
+print("Accuracy: {}, Loss: {}".format(evaluatingCNN[1], evaluatingCNN[0]))
